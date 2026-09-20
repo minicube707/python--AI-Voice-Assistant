@@ -1,5 +1,5 @@
 """
-voice_assistante/voice_assistante.py
+voice_assistant/voice_assistant.py
 ------------------
 Main class of voice assistant.
 
