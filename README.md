@@ -53,7 +53,7 @@ followed by your command. For example:
 
 ### 3. Quit the assistant
 
-Say **"Hey Jarvis"** followed by **"goodbye"** or **"bye"** to exit the program.
+Say **"Hey Jarvis"** followed by **"au revoir"**, **"bye"** or **ciao**  to exit the program.
 
 > "Hey Jarvis, goodbye"
 
