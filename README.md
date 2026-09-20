@@ -1,4 +1,4 @@
-# voice-assistant — Lightweight Local Voice Assistant
+# AI-Voice-Assistant — Lightweight Local Voice Assistant
 
 A 100% local voice assistant, with no LLM required, designed to run
 comfortably on a modest CPU.
