@@ -26,7 +26,7 @@ winget install Gyan.FFmpeg
 ## Installation
 
 ```powershell
-uv add -r requirements.txt
+uv sync
 ```
 
 ## Usage
