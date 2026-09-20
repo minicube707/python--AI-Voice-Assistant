@@ -93,6 +93,21 @@ produce this same object.
 
 Behavior is configured in `config/config.yaml`.
 
+### Music
+
+Before starting the application, make sure to update the `music_dir` value in the configuration file with the path to your music folder.
+
+```yaml
+player:
+  music_dir: "The path for your music folder"
+```
+Replace `The path for your music folder` with the actual path to your music directory.   
+For example:
+
+```yaml
+player:
+  music_dir: "/home/user/Music"
+```
 ### NLP engine
 
 The `zeroshot` engine is optional and recommended for more powerful machines.
