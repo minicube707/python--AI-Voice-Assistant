@@ -139,14 +139,10 @@ API keys for cloud backends are read from a `.env` file at the project root.
 
    # Only needed if ai_agent.backend = "anthropic"
    ANTHROPIC_API_KEY=your_anthropic_key
-
-   # Optional: only if Ollama is not running on the default address
-   OLLAMA_HOST=http://localhost:11434
 ```
 
 | Backend | Variable | Required |
 |---|---|---|
-| `ollama` | `OLLAMA_HOST` | No (defaults to `http://localhost:11434`) |
 | `gemini` | `GEMINI_API_KEY` | Yes |
 | `openai` | `OPENAI_API_KEY` | Yes |
 | `anthropic` | `ANTHROPIC_API_KEY` | Yes |
