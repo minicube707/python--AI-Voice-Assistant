@@ -1,0 +1,63 @@
+# ============================================================
+#Local voice assistant setup
+# ============================================================
+
+wakeword:
+# openWakeWord model to use. "hey_jarvis" is provided pre-trained. 
+# For a 100% custom wake word ("Hey DJ"), you will need to train
+# a dedicated model (see roadmap) or use an STT keyword fallback.
+  model: "hey_jarvis"
+  threshold: 0.1
+  sample_rate: 16000
+  chunk_size: 1280              # 80 ms at 16 kHz, the value recommended by openWakeWord
+  inference_framework: "onnx"   # "onnx" or "tflite" (onnx recommended on Windows/x86)
+  vad_threshold: 0.3            # voice/non-voice filter (integrated Silero VAD)
+  cooldown_seconds: 1.0         # prevents double triggering
+
+
+audio:
+  device_index: null            # null = default Windows device
+  sample_rate: 16000
+  channels: 1
+  command_max_seconds: 10       # maximum listening duration after the wake word
+  command_silence_timeout: 1.2  # stops listening after this silence (seconds)
+
+
+nlp:
+  engine: "rules"               # 'zeroshot', 'rules'
+
+
+stt:
+  engine: "faster-whisper"
+  model_size: "medium"         # tiny / base / small / medium
+  device: "cpu"
+  compute_type: "int8"        # quantization -> reduced RAM and CPU usage
+  language: "fr"
+  beam_size: 1                # 1 = greedy, faster, sufficient for short commands
+  vad_filter: true
+
+
+tts:
+  path: "models"
+  en_model: "en_US-lessac-medium.onnx"
+  fr_model: "fr_FR-siwis-medium.onnx"
+
+
+music_library:
+  # Simplified local store for the MVP (replaceable by a real library/API)
+  catalog_path: "data/music_catalog.json"
+
+
+player:
+  backend: "local_files"      # "local_files"
+  music_dir: "The path for your music folder"
+
+
+logging:
+  level: "INFO"
+  file: "logs/assistant.log"
+
+
+ai_agent:
+  backend: 'ollama'       # 'ollama', 'gemini', 'openai', 'anthropic'
+  model: 'qwen3:1.7b '
