@@ -31,11 +31,14 @@ which is unnecessary and bulky on a machine without a dedicated GPU)
 
 from __future__ import annotations
 import logging
+import re
 
 from transformers import pipeline
 
 from nlp.engine import NLPEngine
 from nlp.intent import INTENT_DESCRIPTIONS
+
+from reply.reply import REPLY
 
 logger = logging.getLogger("nlp.sentiment_engine")
 
@@ -44,7 +47,7 @@ class ZeroShotIntentEngine(NLPEngine):
 
     def __init__(
         self,
-        model_name: str = "cmarkea/distilcamembert-base-nli",
+        model_name: str = "Horizon-Labs/multilingual-zeroshot-base",
         hypothesis_template: str = "Cette phrase correspond à l'intention suivante : {}.",
         catalog_path: str | None = None,
     ):
@@ -55,6 +58,7 @@ class ZeroShotIntentEngine(NLPEngine):
         self.classifier = pipeline(
             "zero-shot-classification",
             model=model_name,
+            tokenizer=model_name,
             device=-1,  # explicitly force CPU (no dedicated GPU available)
         )
         # The candidate labels are derived directly from intent.py:
@@ -65,6 +69,11 @@ class ZeroShotIntentEngine(NLPEngine):
 
 
     def detect_intent(self, text: str) -> str:
+        
+        #Check before the reply sentence
+        for x in REPLY:
+            if re.search(rf"\b{x['quote']}\b", text):
+                return 'reply'
 
         result = self.classifier(
             text,
@@ -74,6 +83,12 @@ class ZeroShotIntentEngine(NLPEngine):
 
         best_intent = result["labels"][0]
         best_score = result["scores"][0]
+
+        for key, value in INTENT_DESCRIPTIONS.items():
+            if value == best_intent:
+                break
+
+        best_intent = key
 
         if best_score < 0.50:
             return "unknown"
