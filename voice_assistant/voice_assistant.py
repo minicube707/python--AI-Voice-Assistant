@@ -30,6 +30,8 @@ from handle.handler_command import handler_command
 from nlp.engine import NLPEngine
 from nlp.rules.rules import RulesEngine
 from nlp.sentiment.sentiment import ZeroShotIntentEngine
+from nlp.laya.laya import LayaEngine
+
 from ai_agent.ai_agent import AIAgent
 
 
@@ -154,6 +156,11 @@ class VoiceAssistant:
 
         elif engine_name == "zeroshot":
             self.nlp_engine = ZeroShotIntentEngine(
+                catalog_path=self.cfg["music_library"]["catalog_path"],
+            )
+
+        elif engine_name == "laya":
+            self.nlp_engine = LayaEngine(
                 catalog_path=self.cfg["music_library"]["catalog_path"],
             )
 
