@@ -58,22 +58,22 @@ INTENTS = {
 
 INTENT_DESCRIPTIONS = {
     "music_control": (
-        "contrôler la musique actuellement en lecture, "
-        "par exemple mettre en pause, reprendre, arrêter ou modifier le volume"
+        "pause the music, "
+        "resume the music, "
+        "stop the music, "
+        "increase the music volume, "
+        "decrease the music volume"
     ),
     "play_music": (
-        "demander de jouer, lancer ou écouter une musique, "
-        "une chanson, un artiste ou une playlist"
+        "play a song, artist, or playlist"
     ),
     "exit": (
-        "quitter l'assistant, terminer la conversation ou dire au revoir"
+        "end the conversation"
     ),
     "reply": (
-        "répondre à un message ou utiliser une réponse conversationnelle prédéfinie"
+        "reply to a message or use a predefined conversational response"
     ),
     "ai_agent": (
-        "demander à un autre agent d'intelligence artificielle de répondre "
-        "à une question ou d'effectuer une tâche. La pharse commence toujours par:"
-        "'demande a olama'"
+       "send a request to Ollama"
     ),
 }
