@@ -24,7 +24,7 @@ audio:
 
 
 nlp:
-  engine: "rules"               # 'zeroshot', 'rules'
+  engine: "rules"               # 'zeroshot', 'rules', 'laya'
 
 
 stt:
