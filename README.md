@@ -114,7 +114,14 @@ The `zeroshot` engine is optional and recommended for more powerful machines.
 
 ```yaml
 nlp:
-  engine: "rules"      # "rules" (default) or "zeroshot"
+  engine: "rules"      # "rules" (default) or "zeroshot", "laya"
+```
+
+The `laya` engine is optional and recommended for more powerful machines.
+
+```yaml
+nlp:
+  engine: "laya"      # "rules" (default) or "zeroshot", "laya"
 ```
 
 ### AI agent
