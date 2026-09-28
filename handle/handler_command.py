@@ -14,7 +14,7 @@ from nlp.command import Command
 
 from ai_agent.ai_agent import AIAgent
 from exit_command.exit_command import exit_command
-from music.controls.music_controls import music_controls
+from music.music_controls.music_controls import music_controls
 from music.music_player.music_player import MusicPlayer
 from reply.reply import reply_to_the_quote
 from speech.tts import TextToSpeech

@@ -17,7 +17,7 @@ from typing import Callable
 from nlp.command import Command
 from nlp.utils import normalize, apply_prefix_corrections
 from music.music_player.extraction import extract_play_music
-from music.controls.extraction import extract_music_controls
+from music.music_controls.extraction import extract_music_controls
 from reply.reply import extract_reply
 from ai_agent.ai_agent import extract_ai_agent
 
