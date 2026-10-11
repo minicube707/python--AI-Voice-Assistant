@@ -27,8 +27,8 @@ def normalize(text: str) -> str:
         str: The normalized text.
     """
 
-    string = unidecode.unidecode(text.lower().strip()).translate(TRANSLATION_TABLE).strip()
-    return " ".join(string.split()).strip()
+    ascii_text = unidecode.unidecode(text).lower()
+    return " ".join(ascii_text.translate(TRANSLATION_TABLE).split())
 
 
 def apply_prefix_corrections(text: str) -> str:
