@@ -17,4 +17,14 @@ class Command:
     def to_dict(self) -> dict:
         return asdict(self)
 
+     
+    def __repr__(self):
 
+        string = f"{self.intent=}\n"
+        string += "self.argument="
+        string += json.dumps(self.argument, indent=4, ensure_ascii=False)
+        string += "\n"
+        string += f"{self.text=}\n"
+        string += f"{self.status=}\n"
+
+        return string
