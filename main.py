@@ -66,8 +66,17 @@ def main():
 
     parser.add_argument("--config", default="config/config.yaml")
     parser.add_argument("--parse", action="store_true", help="Parse the music file")
+    parser.add_argument(
+        "-f", "--force",
+        action="store_true",
+        help="Force a full rescan of the music folder (ignore the cache). Requires --parse",
+    )
 
     args = parser.parse_args()
+
+    # Reject --force on its own: it only modifies the behavior of --parse
+    if args.force and not args.parse:
+        parser.error("--force/-f can only be used together with --parse")
 
     # -------------------------------------------------------------
     # Configuration
@@ -81,7 +90,7 @@ def main():
     # -------------------------------------------------------------
 
     if args.parse:
-        parse_file(cfg["player"]["music_dir"])
+        parse_file(cfg["player"]["music_dir"], force=args.force)
         return
 
     # -------------------------------------------------------------
