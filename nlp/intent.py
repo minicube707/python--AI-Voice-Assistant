@@ -6,7 +6,6 @@ Deliberately simple: a dictionary `{intent: [triggers]}` is more than
 sufficient for an initial set of commands and has negligible CPU/RAM overhead.
 """
 
-
 from reply.reply import REPLY
 from nlp.utils import normalize
 
@@ -21,6 +20,7 @@ PLAY_MUSIC_TRIGGERS = [
     r"\bpasse(?:-moi)?\b",
     r"\bencore\b",
     r"\bremets\b",
+    r"\brejoue\b",
     r"\bpeux tu mettre\b"
 ]
 
