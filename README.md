@@ -138,7 +138,7 @@ music_dir/
         └── music.extension
 ```
 
-Replace `root_music` with your music folder and `extension` with the appropriate audio file extension (e.g., `.mp3`, `.flac`, `.wav`).
+Replace `music_dir` with your music folder and `extension` with the appropriate audio file extension (e.g., `.mp3`, `.flac`, `.wav`).
 
 Make sure your music files are organized according to one of these structures so the application can correctly scan and parse your music library.
 
