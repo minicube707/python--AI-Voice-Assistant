@@ -28,6 +28,25 @@ def handle_music_controls(command: Command, player: MusicPlayer) -> dict:
 
 def handle_play_music(command: Command, player: MusicPlayer, tts: TextToSpeech) -> dict:
 
+    type_playing = command.argument['annonce']['type_playing']
+    requested_item = command.argument['annonce']['requested_item']
+    type_source = command.argument['annonce']['type_source']
+    context_item = command.argument['annonce']['context_item']
+
+    title = None
+    album = None
+    artist = None
+
+    if type_playing == 'title':
+        title = requested_item
+    elif type_playing == 'album':
+        album = requested_item
+    
+    if type_source == 'album':
+        album = context_item
+    elif type_source == 'artist':
+        artist = context_item
+
     if command.status == "ok":
         if command.argument['replay']:
             command = player.last_command
@@ -35,17 +54,19 @@ def handle_play_music(command: Command, player: MusicPlayer, tts: TextToSpeech) 
         player.pause()
 
         tts.announce_play_music(
-            command.argument['title'],
-            command.argument['artist']
+            title,
+            album,
+            artist
         )
 
         return player.play(command)
 
     elif command.status == "not_found":
         logger.warning(
-            "Aucun morceau trouvé pour title=%s artist=%s",
-            command.argument['title'],
-            command.argument['artist']
+            "Aucun morceau trouvé pour title=%s album=%s artist=%s",
+            title,
+            album,
+            artist
         )
 
         resume_music = False

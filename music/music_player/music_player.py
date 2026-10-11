@@ -24,41 +24,43 @@ class MusicPlayer:
         self._audio_player = None
         self._is_playing = False
         self.last_command = None
-
+        self._media_list_player = None
 
     def play(self, command: Command) -> dict:
-        """Finds and plays a track from the music catalog.
+       
+        list_song = command.argument['list_song']
 
-        The track is searched using the provided title and artist. If a matching
-        track is found, its audio file is loaded and played. The function returns
-        a status dictionary indicating whether the track was successfully played,
-        could not be found, or could not be accessed.
+        media_list = vlc.MediaList()
 
-        Args:
-            path (str): path to the music file
+        for song in list_song:
+            file_path = self.music_dir / song["path"]
 
-        Returns:
-            dict: A dictionary containing the playback status and track metadata.
-                The status can be `"playing"`, or `"error"`.
-        """
+            if not os.path.isfile(file_path):
+                logger.error("Fichier non trouvé : %s", file_path)
+                continue
 
-        file_path = self.music_dir / command.argument['path']
-        title = command.argument['title']
-        artist = command.argument['artist']
+            media_list.add_media(str(file_path))
 
-        if not os.path.isfile(file_path):
-            logger.error("Erreur fichier non trouvé")
-            return {"status": "error", "message": "Erreur fichier non trouvé"}
-            
-        logger.info("Lecture : %s - %s (%s)", title, artist, file_path)
+        if media_list.count() == 0:
+            return {
+                "status": "error",
+                "message": "Aucun fichier audio valide"
+            }
 
         self.stop()
-        self._audio_player = vlc.MediaPlayer(str(file_path))
-        self._audio_player.play()
-        self._is_playing = True
-        self.last_command = command
 
-        return {"status": "playing", "title": title, "artist": artist}
+        self._media_list_player = vlc.MediaListPlayer()
+        self._media_list_player.set_media_list(media_list)
+        self._audio_player = self._media_list_player.get_media_player()
+
+        self._media_list_player.play()
+        self._is_playing = True
+        self.last_command = list_song.copy()
+
+        return {
+            "status": "playing",
+            "message": "Lecture de la playlist démarrée"
+        }
 
 
     def stop(self):
@@ -67,9 +69,12 @@ class MusicPlayer:
         If a VLC player is initialized, playback is stopped. Otherwise, the
         function does nothing.
         """
-        if self._audio_player is not None:
-            self._is_playing = False
+        if self._media_list_player is not None:
+            self._media_list_player.stop()
+        elif self._audio_player is not None:
             self._audio_player.stop()
+
+        self._is_playing = False
 
 
     def pause(self):
