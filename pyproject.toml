@@ -10,6 +10,7 @@ dependencies = [
     "langchain>=1.4.2",
     "langchain-ollama>=1.1.0",
     "laya>=0.3.21",
+    "mutagen>=1.48.1",
     "numpy>=2.5.3",
     "openwakeword>=0.4.0",
     "piper>=0.15.1",
