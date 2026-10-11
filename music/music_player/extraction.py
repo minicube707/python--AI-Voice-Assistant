@@ -10,8 +10,10 @@ normalization, keyword matching, noise removal, and metadata completion.
 
 from rapidfuzz import fuzz, process
 
-from music.music_player.find_track import find_track, THRESOLD_SCORE
+from music.music_player.find_track import find_track
 from nlp.command import Command
+
+THRESOLD_SCORE = 75
 
 MUSIC_KEYWORDS = [
     "musique",
@@ -24,7 +26,7 @@ ARTIST_KEYWORDS = [
     "artiste",
     "groupe",
     "chanteur",
-    "hanteuse",
+    "chanteuse",
 ]
 
 CONJUNCTION_WORDS = [
@@ -57,29 +59,29 @@ NOISE_WORD = [
 ]
 
 
-def create_list_artist(catalog: list[dict]) -> list[str]:
-    """Creates a list of unique artists from the sorted music catalog.
+def create_unique_list(catalog: list[dict], key: str) -> list[str]:
+    """Creates a list of unique item from the sorted music catalog.
 
-    The catalog is expected to be sorted by artist. Consecutive duplicate
-    artists are ignored while preserving the order in which artists appear.
+    The catalog is expected to be sorted. Consecutive duplicate
+    item are ignored while preserving the order in which item appear.
 
     Args:
         catalog (list[dict]): List of dictionnary containing local music.
 
     Returns:
-        list[str]: A list of unique artists in catalog order.
+        list[str]: A list of unique item in catalog order.
     """
 
-    artists = []
-    last_artist = None
+    unique_list = []
+    last_value = None
 
     for e in catalog:
-        artist = e["artist"]
-        if artist != last_artist:
-            artists.append(artist)
-            last_artist = artist
+        value = e[key]
+        if value != last_value:
+            unique_list.append(value)
+            last_value = value
 
-    return artists
+    return unique_list
 
 
 def remove_word(sentence: list[str], delete_words: list[str]):
@@ -135,82 +137,56 @@ def extract_value(
     return ' '.join(res[1:]) if res else None
 
 
-def find_value(sentence: list[str]) -> tuple[str, str]:
-    """Splits a sentence into two values based on a conjunction word.
-
-    Args:
-        sentence (list[str]): A list of words forming the sentence.
-
-    Returns:
-        tuple[str, str]: Two string that could be either the title, either the artist name
-    """
-
-    sep_find = False
-    val1 = []
-    val2 = []
-
-    for word in sentence:
-
-        if word in CONJUNCTION_WORDS:
-            sep_find = True
-            continue
-
-        elif not sep_find:
-            val1.append(word)
-
-        else:
-            val2.append(word)
-
-    return ' '.join(val1), ' '.join(val2)
-
-
 def complete_metadata(
-    title: str,
-    artist: str,
-    sentence: list[str]
-    ) -> tuple[str | None, str | None]:
-    """Completes missing title or artist metadata using the remaining words.
+        requested_item: str,
+        context_item: str,
+        sentence: list[str]
+    ) -> tuple[str, str]:
+    """Completes missing title or context_item metadata using the remaining words.
 
     Args:
-        title (str | None): The title of the item, if available.
-        artist (str | None): The artist of the item, if available.
+        requested_item (str): The item who is played.
+        context_item (str): The item where is it.
         sentence (list[str]): A list of words used to complete the missing metadata.
 
     Returns:
-        tuple[str | None, str | None]: The completed title and artist.
+        tuple[str, str]: The completed requested_item (title or album) and context_item (album or artist).
     """
 
     words_to_remove = CONJUNCTION_WORDS + ARTICLE_WORD
     remove_word(sentence, words_to_remove)
 
-    if title is None and artist is not None:
-        title = ' '.join(sentence)
+    if not requested_item and context_item:
+        requested_item = ' '.join(sentence)
 
-    elif title is not None and artist is None:
-        artist = ' '.join(sentence)
+    if requested_item and not context_item:
+        context_item = ' '.join(sentence)
 
-    return title, artist
+    return requested_item, context_item
 
 
 def get_best_matching(
-    titles: list[str],
-    artists: list[str],
-    value: str,
-) -> tuple[tuple[str | None, float], tuple[str | None, float]]:
-    """Finds the best matching title and artist for a given value.
+        list1: list[str],
+        list2: list[str],
+        value: str,
+    ) -> tuple[
+            tuple[str | None, float],
+            tuple[str | None, float]
+        ]:
+    """Finds the best matching for a given value.
 
     Uses fuzzy string matching to compare the input value against the
-    provided titles and artists. The similarity score is the average of
+    provided list1 and list2. The similarity score is the average of
     WRatio and token_sort_ratio.
 
     Args:
-        titles (list[str]): A list of available music titles.
-        artists (list[str]): A list of available artist names.
-        value (str): The value to compare against the titles and artists.
+        list1 (list[str]): A list of available items.
+        list2 (list[str]): A list of available items.
+        value (str): The value to compare against the list1 and list2.
 
     Returns:
         tuple[tuple[str | None, float], tuple[str | None, float]]:
-            A tuple containing the best title match and the best artist match.
+            A tuple containing the best item match and the best item match.
             Each match is represented by a tuple containing the matched string
             and its similarity score. If no match is found, the corresponding
             result is `(None, 0)`.
@@ -227,128 +203,121 @@ def get_best_matching(
         
         return wratio
 
-    if artists:
-        best_artist = process.extractOne(
+    if list1:
+        best_list1 = process.extractOne(
             value,
-            artists,
+            list1,
             scorer=combined_scorer,
         )
-
     else:
-        best_artist = (None, 0)
+        best_list1 = (None, 0)
 
-    if titles:
-        best_title = process.extractOne(
+    if list2:
+        best_list2 = process.extractOne(
             value,
-            titles,
+            list2,
             scorer=combined_scorer,
         )
-
     else:
-        best_title = (None, 0)
+        best_list2 = (None, 0)
 
-    if not best_title:
-        best_title = (None, 0)
+    if not best_list2:
+        best_list2 = (None, 0)
 
-    if not best_artist:
-        best_artist = (None, 0)
+    if not best_list1:
+        best_list1 = (None, 0)
 
-    return best_title, best_artist
-
-
-def best_match(
-    match1: tuple[str, float],
-    match2: tuple[str, float],
-) -> str | None:
-    """Returns the best match based on similarity scores.
-
-    A match is considered valid only if at least one of the two scores is
-    above `THRESOLD_SCORE`. If both scores are equal, no match is selected.
-
-    Args:
-        match1 (tuple[str, float]): The first match and its similarity score.
-        match2 (tuple[str, float]): The second match and its similarity score.
-
-    Returns:
-        str | None: The value of the match with the highest score, or `None`
-            if neither match exceeds the score threshold or if both scores
-            are equal.
-    """
-
-    score1 = match1[1]
-    score2 = match2[1]
-
-    if score1 <= THRESOLD_SCORE and score2 <= THRESOLD_SCORE:
-        return None
-
-    if score1 == score2:
-        return None
-
-    return match1[0] if score1 > score2 else match2[0]
-
-
-def keep_best_match(
-    title: tuple[str, float],
-    artist: tuple[str, float],
-) -> tuple[tuple[str | None, float], tuple[str | None, float]]:
-    """Keeps the match with the highest similarity score.
-
-    Compares the title and artist match scores and keeps only the match with
-    the highest score. The other match is replaced with `(None, 0)`.
-
-    Args:
-        title (tuple[str, float]): The title match and its similarity score.
-        artist (tuple[str, float]): The artist match and its similarity score.
-
-    Returns:
-        tuple[tuple[str | None, float], tuple[str | None, float]]:
-            A tuple containing the title and artist matches. Only the match
-            with the highest score is preserved.
-    """
-    if title[1] > artist[1]:
-        return title, (None, 0)
-    return (None, 0), artist
+    return best_list1, best_list2
 
 
 def refine_with_catalog(
-    catalog: list[dict],
-    title: str, 
-    artist: str
-    ) -> tuple[str, str]:
+        catalog: list[dict],
+        title: str, 
+        album: str,
+        artist: str,
+        requested_item: str,
+        context_item: str
+    ) -> tuple[str, str, str]:
     """Refines the data extract from the sentence by matching values against the catalog.
 
     If the catalog is empty, the original extraction is returned unchanged.
-    Otherwise, the extracted values are compared against the catalog titles 
-    and artists using fuzzy matching. 
-    The best matches are then selected to determine the most likely title and artist.
+    Otherwise, the extracted values are compared against the catalog titles,
+    album and artists using fuzzy matching. 
+    The best matches are then selected to determine the most likely title, album and artist.
 
     Args:
         catalog (list[dict]): List of dictionnary containing local music.
-        title (str): The title of the track to find, or `None` if not provided.
-        artist (str): The artist of the track to find, or `None` if not provided.
+        title (str): The title of the track to find.
+        album (str): The album of the track to find.
+        artist (str): The artist of the track to find.
+        requested_item (str): The item who will be played
+        context_item (str): Where the track come from
 
     Returns:
-        tuple[str, str]: The refined extraction result containing `title` and
-            `artist` when a catalog match is found, or the original extraction
-            if no catalog is available or the information was already found.
+        tuple[str, str, str]: The refined extraction result containing `title`,
+            `album` and `artist` when a catalog match is found, 
+            or the original extraction if no catalog is available
     """
     
     if not catalog:
-        return title, artist
+        return title, album, artist
 
-    titles = [e["title"] for e in catalog]
-    artists = create_list_artist(catalog)
+    list_titles = [e["title"] for e in catalog]
+    list_albums = create_unique_list(catalog, 'album')
+    list_artists = create_unique_list(catalog, 'artist')
 
-    best_title1, best_artist1 = get_best_matching(titles, artists, title)
-    best_title2, best_artist2 = get_best_matching(titles, artists, artist)
+    best_title, best_album = get_best_matching(list_titles, list_albums, requested_item)
 
-    best_title1, best_artist1 = keep_best_match(best_title1, best_artist1)
-    best_title2, best_artist2 = keep_best_match(best_title2, best_artist2)
+    find_album = False
+    if best_title[1] > THRESOLD_SCORE and best_title[1] > best_album[1]:
+        title = best_title[0]
+        album = None
+    elif best_album[1] > THRESOLD_SCORE and best_title[1] < best_album[1]:
+        album = best_album[0]
+        title = None
+        find_album = True
+    
+    best_album, best_artist = get_best_matching(list_albums, list_artists, context_item)
 
-    title = best_match(best_title1, best_title2)
-    artist = best_match(best_artist1, best_artist2)
+    if best_album[1] > THRESOLD_SCORE and best_album[1] > best_artist[1]:
+        album = best_album[0]
+        artist = None
+    elif best_artist[1] > THRESOLD_SCORE and best_album[1] < best_artist[1]:
+        artist = best_artist[0]
+        if not find_album:
+            album = None
 
-    return title, artist
+    return title, album, artist
+
+
+def update_item(
+        title: str, 
+        album: str,
+        artist: str
+    ):
+
+    type_playing = ''
+    requested_item = ''
+    type_source = ''
+    context_item = ''
+    find_album = False
+
+    if title is not None:
+        type_playing = 'title'
+        requested_item = title
+    elif album is not None:
+        type_playing = 'album'
+        requested_item = album
+        find_album = True
+
+    if album is not None and not find_album:
+        type_source = 'album'
+        context_item = album
+    elif artist is not None:
+        type_source = 'artist'
+        context_item = artist
+    
+    return type_playing, requested_item, type_source, context_item
 
 
 def extract_play_music(catalog: list[dict], sentence: str) -> Command:
@@ -366,7 +335,8 @@ def extract_play_music(catalog: list[dict], sentence: str) -> Command:
     Returns:
         Command: The command with instruction
     """
-    if "encore" == sentence or "remets" in sentence:
+
+    if "encore" == sentence or "remets" in sentence or "rejoue" in sentence:
         return Command(
         argument={
             'replay': True,
@@ -382,36 +352,46 @@ def extract_play_music(catalog: list[dict], sentence: str) -> Command:
     remove_word(sentence, COMMAND_KEYWORDS )
 
     title = extract_value(sentence, MUSIC_KEYWORDS, CONJUNCTION_WORDS)
+    album = extract_value(sentence, ["album"], CONJUNCTION_WORDS)
     artist = extract_value(sentence, ARTIST_KEYWORDS, CONJUNCTION_WORDS)
-
-    if title == None or artist == None:
-        title, artist = complete_metadata(title, artist, sentence.copy())
     
-    if title == None or artist == None:
-        title, artist = find_value(sentence)
+    _, requested_item, _, context_item = update_item(title, album, artist)
 
-    title, artist = refine_with_catalog(catalog, title, artist)
+    if not requested_item or not context_item:
+        requested_item, context_item = complete_metadata(requested_item, context_item, sentence.copy())
 
-    track = find_track(catalog, title, artist)
+    title, album, artist = refine_with_catalog(
+        catalog,
+        title,
+        album,
+        artist,
+        requested_item,
+        context_item)
 
-    if track is None:
-        title=""
-        artist=""
-        status = "not_found"
-        path = ""
-    
-    else:
-        title=track["title"]
-        artist=track["artist"]
-        status="ok"
-        path=track["file"]
+    list_song = find_track(catalog, title, album, artist)
+
+    type_playing, requested_item, type_source, context_item = update_item(title, album, artist)
+
+    annonce = {
+        'type_playing': type_playing,
+        'requested_item': requested_item,
+        'type_source': type_source,
+        'context_item': context_item
+    }
+
+    if not list_song:
+        return Command(
+            argument={
+                'annonce': annonce
+            },
+            status='not_found',
+        )
 
     return  Command(
         argument={
-            'title': title,
-            'artist': artist,
-            'path': path,
-            'replay': False
+            'list_song': list_song,
+            'replay': False,
+            'annonce': annonce
         },
-        status=status,
+        status='ok',
     )

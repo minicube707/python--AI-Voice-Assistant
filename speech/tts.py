@@ -95,8 +95,12 @@ class TextToSpeech:
         self._play(full_audio, self.voice_fr.config.sample_rate)
 
 
-    def announce_play_music(self, title: str | None, artist: str | None):
-        """Builds the ad based on an already structured Command."""
+    def announce_play_music(
+        self,
+        title: str | None,
+        album: str | None,
+        artist: str | None
+    ):
         segments: list[tuple[str, str]] = []
         
         start_sentence = np.random.choice(START_SENTENCE)
@@ -107,12 +111,34 @@ class TextToSpeech:
         segments.append((verbe_sentence, "fr"))
 
         if title and artist:
-            segments.extend([(title, "en"), ("de", "fr"), (artist, "en")])
+            segments.extend([
+                ("la musique", "fr"),
+                (title, "en"),
+                ("de l'artist", "fr"),
+                (artist, "en")
+            ])
+
+        elif album and artist:
+            segments.extend([
+                ("l'album", "fr"),
+                (album, "en"),
+                ("de l'artist", "fr"),
+                (artist, "en")
+            ])
+
+        elif title and album:
+            segments.extend([
+                ("la musique", "fr"),
+                (title, "en"),
+                ("de l'album", "fr"),
+                (album, "en")
+            ])
+
         elif title:
-            segments.append((title, "en"))
+            segments.extend([("la musique", "fr"), (title, "en")])
+        elif album:
+            segments.extend([("l'album", "fr"), (album, "en")])
         elif artist:
-            segments.append((artist, "en"))
-        else:
-            segments.append(("de la musique", "fr"))
+            segments.extend([("du", "fr"), (artist, "en")])
 
         self.speak_mixed(segments)

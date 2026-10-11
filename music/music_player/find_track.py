@@ -1,127 +1,55 @@
-import random
 
-from rapidfuzz import fuzz, process, utils
+def filter_by_category(
+        list_song: list[dict],
+        category: str,
+        value: str,
+    ) -> dict | None:
 
-THRESOLD_SCORE = 80
 
-
-def filter_by_artist(
-    candidates: list[dict],
-    artist: str,
-) -> list[dict]:
-    """Filters track candidates by artist similarity.
-
-    Tracks are kept when their artist name reaches the similarity threshold
-    defined by `THRESOLD_SCORE`. If no artist matches the threshold, the
-    original list of candidates is returned instead of an empty list.
-
-    Args:
-        candidates (list[dict]): The tracks to filter.
-        artist (str): The artist name used for filtering.
-
-    Returns:
-        list[dict]: The tracks matching the artist, or the original candidates
-            if no match is found.
-    """
-
-    if not artist:
-        return candidates
+    if not list_song or value is None:
+        return list_song
 
     filtered = [
-        track
-        for track in candidates
-        if fuzz.token_sort_ratio(track["artist"], artist) >= THRESOLD_SCORE
+        song
+        for song in list_song
+        if song[category] == value
     ]
 
-    return filtered if filtered else candidates
-
-
-def find_by_title(
-    candidates: list[dict],
-    title: str,
-) -> dict | None:
-    """Finds the track with the closest matching title.
-
-    Uses fuzzy string matching to compare the given title with the titles
-    of the candidate tracks. The best match is returned only if its
-    similarity score reaches `THRESOLD_SCORE`.
-
-    Args:
-        candidates (list[dict]): The tracks to search through.
-        title (str): The title to match against the candidate tracks.
-
-    Returns:
-        Optional[dict]: The track with the best matching title, or `None`
-            if there are no candidates or no match meets the similarity
-            threshold.
-    """
-
-    if not candidates:
-        return None
-
-    best = process.extractOne(
-        title,
-        [track["title"] for track in candidates],
-        scorer=fuzz.token_sort_ratio,
-        processor=utils.default_process,
-    )
-
-    if not best or best[1] < THRESOLD_SCORE:
-        return None
-
-    return next(
-        (track for track in candidates if track["title"] == best[0]),
-        None,
-    )
-
-
-def pick_random(candidates: list[dict]) -> dict | None:
-    """Selects a random track from a list of candidates.
-
-    Args:
-        candidates (list[dict]): The tracks to choose from.
-
-    Returns:
-        Optional[dict]: A randomly selected track, or `None` if the list
-            of candidates is empty.
-    """
-
-    if not candidates:
-        return None
-
-    return random.choice(candidates)
+    return filtered
 
 
 def find_track(
-    catalog: list[dict], 
-    title: str, 
-    artist: str) -> None | dict:
+        catalog: list[dict], 
+        title: str,
+        album: str, 
+        artist: str
+    ) -> None | list[dict]:
     """Finds a track in the catalog based on the provided metadata.
 
     If neither a title nor an artist is provided, no track is returned.
     When an artist is provided, the catalog is filtered by artist.
     If a title is also provided, the best matching track is searched among
-    the filtered candidates. Otherwise, a random track is selected from
-    the matching artist candidates.
+    the filtered candidates.
 
     Args:
         catalog (list[dict]): List of dictionnary containing local music.
         title (str): The title of the track to find, or `None` if not provided.
+        album (str): The album of the track to find, or `None` if not provided.
         artist (str): The artist of the track to find, or `None` if not provided.
 
     Returns:
-        None | dict: The matching track, a random track matching the artist,
-            or `None` if no title or artist is provided or no suitable track
-            is found.
+        None | list[dict]: The matching track, all sound that corresponding 
+        to the request
     """
 
-    # Wrong artist or title given (e.g. "Play unknown artist")
-    if title is None and artist is None:
-        return None
+    candidates = filter_by_category(catalog, 'artist', artist)
+    candidates = filter_by_category(candidates, 'album', album)
+    candidates = filter_by_category(candidates, 'title', title)
 
-    candidates = filter_by_artist(catalog, artist)
+    if title and candidates:
+        #if the title is requested, return only the first song
+        return candidates[:1]
 
-    if title:
-        return find_by_title(candidates, title)
-
-    return pick_random(candidates)
+    if candidates:
+        return candidates
+    return None
