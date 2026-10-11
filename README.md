@@ -40,6 +40,12 @@ music folder and generates a JSON file in `data/`.
 python main.py --parse
 ```
 
+Run this with -f whenever you want to force a full re-parse of your music folder instead of updating the existing data. This regenerates the JSON file in data/ from scratch.
+
+```powershell
+python main.py --parse -f
+```
+
 ### 2. Start the assistant
 
 ```powershell
@@ -97,17 +103,45 @@ Behavior is configured in `config/config.yaml`.
 
 Before starting the application, make sure to update the `music_dir` value in the configuration file with the path to your music folder.
 
-```yaml
+```
 player:
   music_dir: "The path for your music folder"
 ```
-Replace `The path for your music folder` with the actual path to your music directory.   
+
+Replace `The path for your music folder` with the actual path to your music directory.
+
 For example:
 
-```yaml
+```
 player:
   music_dir: "/home/user/Music"
 ```
+
+### Music folder structure
+
+Your music files must follow one of the following directory structures:
+
+**Option 1: Artist / Music file**
+
+```
+music_dir/
+└── Artist/
+    └── music.extension
+```
+
+**Option 2: Artist / Album / Music file**
+
+```
+music_dir/
+└── Artist/
+    └── Album/
+        └── music.extension
+```
+
+Replace `root_music` with your music folder and `extension` with the appropriate audio file extension (e.g., `.mp3`, `.flac`, `.wav`).
+
+Make sure your music files are organized according to one of these structures so the application can correctly scan and parse your music library.
+
 ### NLP engine
 
 The `zeroshot` engine is optional and recommended for more powerful machines.
