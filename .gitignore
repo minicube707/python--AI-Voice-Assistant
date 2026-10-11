@@ -10,3 +10,7 @@ logs
 
 # Data
 data
+
+# Environment test
+test.py
+/tests
