@@ -32,6 +32,9 @@ def run_python_in_sandbox(code: str) -> str:
     self-contained (including imports) and must include its own assertions for testing purposes. 
     No network access is permitted; only the standard library is available.
     """
+    
+    code = unidecode.unidecode(code)
+
     name = f"agent-sandbox-{uuid.uuid4().hex[:8]}"
     cmd = [
         "docker", "run", "--rm", "-i",
