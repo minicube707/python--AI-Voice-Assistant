@@ -17,17 +17,33 @@ comfortably on a modest CPU.
 - [Python](https://www.python.org/downloads/) and [uv](https://docs.astral.sh/uv/)
 - [VLC](https://www.videolan.org/vlc/) (audio playback)
 - [FFmpeg](https://ffmpeg.org/download.html) (audio processing)
+- **Optional**: [Docker Desktop](https://docs.docker.com/desktop/setup/install/windows-install/) — to create an isolated sandbox environment where the model can write, execute, and test code.
 
+## Installation
+
+Install VLC and FFmpeg:
 ```powershell
 winget install VideoLAN.VLC
 winget install Gyan.FFmpeg
 ```
 
-## Installation
-
+Install the project dependencies:
 ```powershell
 uv sync
 ```
+### Optional: Docker Desktop
+Docker Desktop is only required if you want to run the model's code in an isolated sandbox.
+
+1. Install Docker Desktop for Windows.
+2. Enable the WSL 2 backend if required.
+3. Start Docker Desktop and verify that Docker is running:
+
+```powershell
+docker --version
+docker info
+```
+
+**Note**: Docker Desktop is not required to install or run the project unless the sandbox functionality is enabled. For security, execute model-generated code in restricted containers with appropriate resource limits and limited access to the host system.
 
 ## Usage
 
@@ -52,16 +68,63 @@ python main.py --parse -f
 python main.py
 ```
 
-Wait until 'Listen...' is displayed, then say **"Hey Jarvis"** (the pre-trained wake word shipped by default),
-followed by your command. For example:
+Wait until Listen... is displayed in the terminal. Then say **"Hey Jarvis"**, the default pre-trained wake word, followed by your command.
 
-> "Hey Jarvis, play Billie Jean by Michael Jackson"
+#### Available Commands
+🎵 **Play Music**  
+Ask Jarvis to play a specific song by providing its title and artist.
+
+**Example:**
+
+"Hey Jarvis, joue Billie Jean de Michael Jackson."
+
+💿 **Play an Album**  
+Ask Jarvis to play an entire album by specifying its title and artist.
+
+**Example**:
+
+"Hey Jarvis, joue l'album Discovery de Daft Punk."
+
+📚 **Look Up Definitions on Wikipedia**  
+Ask Jarvis to retrieve information from Wikipedia and use Ollama to help explain or summarize it. You can specify the language of the Wikipedia source.
+
+**Example**:
+
+"Hey Jarvis, demande à Ollama donne moi la définition d'une république en utilisant Wikipédia en français."
+
+📰 **Search for the Latest News**  
+Ask Jarvis to search the internet for recent news and use Ollama to summarize the results.
+
+**Example**:
+
+"Hey Jarvis, demande à Ollama recherche sur Internet les dernières actualités en France en 2026 et résumer les principaux événements."
+
+🧮 **Solve Mathematical Problems with Python**  
+Ask Jarvis to generate and execute Python code to perform calculations or solve mathematical problems.
+
+**Example**:
+
+"Hey Jarvis, demande à Ollama écrie et exécute un script Python pour calculer les chiffres de pi."
+
+💬 **Ask Questions**  
+Ask Jarvis general questions and let Ollama generate an answer.
+
+**Example**:
+
+"Hey Jarvis, demande à Ollama explique moi comment fonctionnent les trous noirs."  
+
+#### Notes
+Always start your command with "Hey Jarvis" to activate the assistant.
+Speak clearly and wait for the assistant to process your request.
+Internet access is required for online searches, such as retrieving news or Wikipedia information.
+Ollama must be installed and properly configured for AI-powered responses.
+Docker Desktop is optional and can be used to provide an isolated sandbox for executing and testing model-generated Python code.
 
 ### 3. Quit the assistant
 
 Say **"Hey Jarvis"** followed by **"au revoir"**, **"bye"** or **ciao**  to exit the program.
 
-> "Hey Jarvis, goodbye"
+> "Hey Jarvis, au revoir"
 
 The assistant replies with a farewell message and shuts down cleanly.
 
@@ -85,7 +148,7 @@ Each folder is a component that can be replaced independently
 | `handle/` | Executes the recognized command |
 | `log/` | Log files |
 | `music/` | Functions to play and control music |
-| `nlp/` | Understanding: `rules.py` (default) or `sentiment.py` (optional) |
+| `nlp/` | Understanding: `rules.py` (default) or `sentiment.py` (optional) or `laya.py` (optional)|
 | `parse/` | Scans your music folder to generate the file stored in `data/` |
 | `reply/` | Predefined sentences the assistant uses to reply |
 | `speech/` | Speech-to-Text (faster-whisper) and Text-to-Speech (Piper) |
@@ -159,11 +222,6 @@ nlp:
 ```
 
 ### AI agent
-
-After the wake word, say **"demande a Ollama"** followed by your question.  
-For example:
-
-> "Hey Jarvis, demande a ollama qelle est la météo à Paris aujourd'hui"
 
 Available backends: `ollama`, `gemini`, `openai`, `anthropic`.
 
