@@ -16,7 +16,7 @@ from dotenv import load_dotenv
 
 from voice_assistant.voice_assistant import VoiceAssistant
 from parse.parse_file import parse_file
-
+from nlp.neural.training import NeuralTrainer
 
 load_dotenv()
 
@@ -66,6 +66,7 @@ def main():
 
     parser.add_argument("--config", default="config/config.yaml")
     parser.add_argument("--parse", action="store_true", help="Parse the music file")
+    parser.add_argument("--train", action="store_true", help="Train the Neural Engine")
     parser.add_argument(
         "-f", "--force",
         action="store_true",
@@ -91,6 +92,18 @@ def main():
 
     if args.parse:
         parse_file(cfg["player"]["music_dir"], force=args.force)
+        return
+
+    # -------------------------------------------------------------
+    # Train Neural Engine
+    # -------------------------------------------------------------
+
+    if args.train:
+        trainer = NeuralTrainer()
+        # try:
+        trainer.training()
+        # except Exception:
+        #     print("Neural NLP Engine training failed.")
         return
 
     # -------------------------------------------------------------
