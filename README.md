@@ -207,18 +207,31 @@ Make sure your music files are organized according to one of these structures so
 
 ### NLP engine
 
+Default:  
+```yaml
+nlp:
+  engine: "rules"
+```
+
 The `zeroshot` engine is optional and recommended for more powerful machines.
 
 ```yaml
 nlp:
-  engine: "rules"      # "rules" (default) or "zeroshot", "laya"
+  engine: "zeroshot"
 ```
 
 The `laya` engine is optional and recommended for more powerful machines.
 
 ```yaml
 nlp:
-  engine: "laya"      # "rules" (default) or "zeroshot", "laya"
+  engine: "laya"
+```
+
+The `neural` engine is optional and recommended for more powerful machines.
+
+```yaml
+nlp:
+  engine: "neural"
 ```
 
 ### AI agent
