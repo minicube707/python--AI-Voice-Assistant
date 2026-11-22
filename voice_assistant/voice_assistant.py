@@ -31,6 +31,7 @@ from nlp.engine import NLPEngine
 from nlp.rules.rules import RulesEngine
 from nlp.sentiment.sentiment import ZeroShotIntentEngine
 from nlp.laya.laya import LayaEngine
+from nlp.neural.neural import NeuralEngine
 
 from ai_agent.ai_agent import AIAgent
 
@@ -161,6 +162,11 @@ class VoiceAssistant:
 
         elif engine_name == "laya":
             self.nlp_engine = LayaEngine(
+                catalog_path=self.cfg["music_library"]["catalog_path"],
+            )
+        
+        elif engine_name == "neural":
+            self.nlp_engine = NeuralEngine(
                 catalog_path=self.cfg["music_library"]["catalog_path"],
             )
 

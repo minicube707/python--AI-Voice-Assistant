@@ -1,0 +1,79 @@
+
+{
+  "intents": [
+    {
+      "tag": "play_music",
+      "patterns": [
+        "Mets la musique",
+        "Mets de la musique",
+        "Mets-moi de la musique",
+        "Joue de la musique",
+        "Joue-moi une chanson",
+        "Lance de la musique",
+        "Démarre la musique",
+        "Je veux écouter de la musique",
+        "Je veux écouter une chanson",
+        "Passe-moi de la musique",
+        "Passe une chanson",
+        "Mets une chanson",
+        "Fais jouer de la musique",
+        "Je voudrais écouter quelque chose",
+        "Peux-tu mettre de la musique",
+        "Peux-tu mettre la musique",
+        "Peux-tu me jouer une chanson",
+        "Remets de la musique",
+        "encore",
+        "encore la musique"
+      ]
+    },
+    {
+      "tag": "music_control",
+      "patterns": [
+        "Arrête",
+        "Stop",
+        "Pause",
+        "Reprends la musique",
+        "Continue la musique",
+        "Augmente le volume",
+        "Baisse le volume",
+        "Diminue le son",
+        "Monte le son",
+        "Mets le son plus fort",
+        "Mets le son moins fort",
+        "Augmente le son",
+        "Réduis le volume",
+        "Mets le volume à 50 pour cent"
+      ]
+    },
+    {
+      "tag": "exit",
+      "patterns": [
+        "Au revoir",
+        "Bye bye",
+        "Ciao",
+        "À bientôt",
+        "À plus tard",
+        "Bonne journée",
+        "Bonne soirée",
+        "Je m'en vais",
+        "Je dois partir",
+        "On se reparle plus tard",
+        "Termine la conversation",
+        "Ferme l'assistant",
+        "Arrête-toi",
+        "Tu peux arrêter maintenant",
+        "C'est tout pour aujourd'hui",
+        "Eteint toi"
+      ]
+    },
+    {
+      "tag": "ai_agent",
+      "patterns": [
+        "Demande à Ollama qui est Issac Newton",
+        "Demande à Ollama qu'elle est la météo à Paris actuellement",
+        "Demande à Ollama qu'elle sont les 10 premiers décimales de pi",
+        "Demande à Ollama qu'elle sont les nouvelles actuellement"
+      ]
+    }
+  ]
+}
