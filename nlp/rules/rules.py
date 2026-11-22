@@ -13,7 +13,7 @@ import json
 import re
 
 from nlp.engine import NLPEngine
-from nlp.intent import INTENTS
+from nlp.rules.intent import INTENTS
 
 
 class RulesEngine(NLPEngine):
@@ -39,9 +39,3 @@ class RulesEngine(NLPEngine):
                     return intent
 
         return "unknown"
-
-
-        
-
-
-    

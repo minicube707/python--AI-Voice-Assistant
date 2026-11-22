@@ -36,7 +36,7 @@ import re
 from transformers import pipeline
 
 from nlp.engine import NLPEngine
-from nlp.intent import INTENT_DESCRIPTIONS
+from nlp.intent_descriptions import INTENT_DESCRIPTIONS
 
 from reply.reply import REPLY
 

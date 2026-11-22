@@ -1,5 +1,5 @@
 from nlp.command import Command
-from nlp.intent import AI_AGENT_TRIGGERS
+from nlp.rules.intent import AI_AGENT_TRIGGERS
 
 from langchain.agents import create_agent
 from ai_agent.tools import search_tool, wiki_tool, get_weather
