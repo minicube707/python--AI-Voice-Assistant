@@ -7,6 +7,7 @@ CORRECTIONS = {
     "memoir": "mets moi",
     "mes": "mets",
     "reprends": "reprend",
+    'olama': "ollama"
 }
 
 PUNCTUATION_TO_REMOVE = ".,'()-<>!?"
@@ -47,9 +48,7 @@ def apply_prefix_corrections(text: str) -> str:
 
     text = text.strip()
     for wrong, correct in CORRECTIONS.items():
-        
-        if text.startswith(wrong):
-            text = correct + text[len(wrong):]
-            break
+        if wrong in text:
+            text = text.replace(wrong, correct, 1)
 
     return text

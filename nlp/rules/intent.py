@@ -41,7 +41,7 @@ EXIT_TRIGGERS = [
 ]
 
 AI_AGENT_TRIGGERS = [
-    r"\bdemande a olama\b",
+    r"\bdemande a ollama\b",
 ]
 
 # Future intentions (roadmap): pause_music, next_track, volume_up, ...
