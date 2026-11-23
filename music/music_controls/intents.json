@@ -1,0 +1,105 @@
+{
+  "intents": [
+    {
+      "tag": "pause",
+      "patterns": [
+        "Pause",
+        "Mets pause",
+        "Mets en pause",
+        "Mets la musique en pause",
+        "Fais une pause",
+        "Pause la musique",
+        "Mets sur pause",
+        "Suspends la musique",
+        "Mets la chanson en pause",
+        "Pause s'il te plait"
+      ]
+    },
+    {
+      "tag": "stop",
+      "patterns": [
+        "Stop",
+        "Stoppe la musique",
+        "Stop la musique",
+        "Arrête la musique",
+        "Arrête",
+        "Arrête la chanson",
+        "Coupe la musique",
+        "Éteins la musique",
+        "Ça suffit",
+        "Stop la chanson",
+        "Arrête de jouer"
+      ]
+    },
+    {
+      "tag": "continue",
+      "patterns": [
+        "Reprends",
+        "Reprends la musique",
+        "Reprendre la musique",
+        "Continue",
+        "Continue la musique",
+        "Remets la musique",
+        "Relance la musique",
+        "Reprends la lecture",
+        "Reprends la chanson",
+        "Continue la lecture",
+        "Enlève la pause",
+        "Poursuis la musique"
+      ]
+    },
+    {
+      "tag": "increase_volume",
+      "patterns": [
+        "Augmente le volume",
+        "Augmente le son",
+        "Monte le son",
+        "Monte le volume",
+        "Mets le son plus fort",
+        "Mets le volume plus fort",
+        "Plus fort",
+        "Un peu plus fort",
+        "Le son plus fort",
+        "Peux-tu augmenter le volume",
+        "Hausse le volume",
+        "Plus de volume"
+      ]
+    },
+    {
+      "tag": "decrease_volume",
+      "patterns": [
+        "Baisse le volume",
+        "Baisse le son",
+        "Diminue le volume",
+        "Diminue le son",
+        "Réduis le volume",
+        "Réduis le son",
+        "Mets le son moins fort",
+        "Mets le volume moins fort",
+        "Moins fort",
+        "Un peu moins fort",
+        "Le son moins fort",
+        "Peux-tu baisser le volume",
+        "Moins de volume"
+      ]
+    },
+    {
+      "tag": "volume",
+      "patterns": [
+        "Mets le volume à 50 pour cent",
+        "Mets le volume à 30",
+        "Mets le son à 70 pour cent",
+        "Volume à 20",
+        "Volume à 80 pour cent",
+        "Règle le volume à 40",
+        "Règle le son à 60 pour cent",
+        "Mets le volume à 100",
+        "Mets le volume à 0",
+        "Le son à 25 pour cent",
+        "Change le volume à 90",
+        "Passe le volume à 10 pour cent",
+        "Mets le volume à 45 %"
+      ]
+    }
+  ]
+}

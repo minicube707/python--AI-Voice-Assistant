@@ -50,9 +50,13 @@ class ZeroShotIntentEngine(NLPEngine):
         model_name: str = "Horizon-Labs/multilingual-zeroshot-base",
         hypothesis_template: str = "Cette phrase correspond à l'intention suivante : {}.",
         catalog_path: str | None = None,
+        music_controls_intent: str = "rules",
     ):
 
-        super().__init__(catalog_path=catalog_path)
+        super().__init__(
+            catalog_path=catalog_path,
+            music_controls_intent=music_controls_intent,
+        )
         logger.info("Loading model zero-shot (%s)...", model_name)
 
         self.classifier = pipeline(
