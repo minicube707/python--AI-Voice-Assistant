@@ -3,6 +3,9 @@ import subprocess
 import logging
 import requests
 import time
+import platform
+import os
+import shutil
 
 logger = logging.getLogger("ai_agent")
 
@@ -45,30 +48,65 @@ def ensure_ollama_running(timeout: int = 10):
     raise Exception(error_msg)
 
 
-def ensure_docker_running(timeout: int = 20) -> bool:
+def get_docker_desktop_path():
+    system = platform.system()
+
+    if system == "Windows":
+        paths = [
+            os.path.expandvars(r"%ProgramFiles%\Docker\Docker\Docker Desktop.exe"),
+            os.path.expandvars(r"%LocalAppData%\Programs\Docker\Docker Desktop.exe"),
+        ]
+
+    elif system == "Darwin":
+        paths = ["/Applications/Docker.app/Contents/MacOS/Docker"]
+
+    elif system == "Linux":
+        paths = ["docker-desktop"]
+
+    else:
+        return None
+
+    for path in paths:
+        if os.path.isfile(path) or shutil.which(path):
+            return path
+
+    return None
+
+
+def ensure_docker_running(timeout: int = 60) -> bool:
     """
-    Verify that Docker Engine is available. 
+    Verify that Docker Engine is available.
     If necessary, start Docker Desktop and wait for it to initialize.
     """
 
-    # 1. Check whether Docker Engine is already responding
-    try:
-        result = subprocess.run(
-            ["docker", "info"],
-            capture_output=True,
-            text=True,
-            timeout=10,
-            check=False,
+    def docker_available():
+        try:
+            result = subprocess.run(
+                ["docker", "info"],
+                capture_output=True,
+                text=True,
+                timeout=5,
+                check=False,
+            )
+            return result.returncode == 0
+
+        except (subprocess.TimeoutExpired, FileNotFoundError):
+            return False
+
+    # 1. Check Docker Engine
+    if docker_available():
+        logger.info("Docker Engine is already up and running.")
+        return True
+
+    # 2. Find Docker Desktop
+    docker_desktop = get_docker_desktop_path()
+
+    if not docker_desktop:
+        raise FileNotFoundError(
+            "Docker Desktop executable could not be found."
         )
 
-        if result.returncode == 0:
-            logger.info("Docker Engine is already up and running.")
-            return True
-
-    except (subprocess.TimeoutExpired, FileNotFoundError) as exc:
-        logger.warning("Docker unavailable: %s", exc)
-
-    # 2. Launch Docker Desktop
+    # 3. Start Docker Desktop
     logger.info("Starting Docker Desktop...")
 
     subprocess.Popen(
@@ -78,30 +116,20 @@ def ensure_docker_running(timeout: int = 20) -> bool:
         creationflags=getattr(subprocess, "CREATE_NO_WINDOW", 0),
     )
 
-    # 3. Wait for Docker Engine to respond
+    # 4. Wait for Docker Engine
     start_time = time.monotonic()
 
     while time.monotonic() - start_time < timeout:
-        try:
-            result = subprocess.run(
-                ["docker", "info"],
-                capture_output=True,
-                text=True,
-                timeout=5,
-                check=False,
-            )
-
-            if result.returncode == 0:
-                logger.info("Docker Engine is now up and running.")
-                return True
-
-        except (subprocess.TimeoutExpired, FileNotFoundError):
-            pass
+        if docker_available():
+            logger.info("Docker Engine is now up and running.")
+            return True
 
         time.sleep(2)
 
-    error_msg = f"Docker Engine is not available after {timeout} seconds. " \
+    error_msg = (
+        f"Docker Engine is not available after {timeout} seconds. "
         "Check Docker Desktop and its Linux engine."
+    )
 
-    logger.exception(error_msg)
+    logger.error(error_msg)
     raise TimeoutError(error_msg)

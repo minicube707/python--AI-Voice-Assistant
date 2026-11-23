@@ -4,6 +4,7 @@ import subprocess
 import uuid
 import logging
 import time
+import unidecode
 
 from langchain_core.tools import tool
 
