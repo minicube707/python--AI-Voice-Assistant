@@ -32,6 +32,10 @@
         "Arrête",
         "Stop",
         "Pause",
+        "Mets la musique en pause",
+        "Stop la musique",
+        "Arrête la musique",
+        "Pause la musique",
         "Reprends la musique",
         "Continue la musique",
         "Augmente le volume",
@@ -63,7 +67,7 @@
         "Arrête-toi",
         "Tu peux arrêter maintenant",
         "C'est tout pour aujourd'hui",
-        "Eteint toi"
+        "éteint toi"
       ]
     },
     {

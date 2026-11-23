@@ -17,7 +17,7 @@ from typing import Callable
 from nlp.command import Command
 from nlp.utils import normalize, apply_prefix_corrections
 from music.music_player.extraction import extract_play_music
-from music.music_controls.extraction import extract_music_controls
+from music.music_controls import create_music_controls_intent
 from reply.reply import extract_reply
 from ai_agent.ai_agent import extract_ai_agent
 
@@ -34,8 +34,15 @@ class NLPEngine(ABC):
     """
 
 
-    def __init__(self, catalog_path: str | None = None):
+    def __init__(
+        self,
+        catalog_path: str | None = None,
+        music_controls_intent: str = "rules",
+    ):
         self.catalog = self._load_catalog(catalog_path) if catalog_path else []
+        self._intent_music_controls = create_music_controls_intent(
+            music_controls_intent
+        )
 
         self._intent_handlers: dict[str, Callable[[str], Command]] = {
             "play_music": self._handle_play_music,
@@ -107,7 +114,7 @@ class NLPEngine(ABC):
 
 
     def _handle_music_control(self, text: str) -> Command:
-        return extract_music_controls(text)
+        return self._intent_music_controls(text)
 
 
     def _handle_exit(self, text: str) -> Command:

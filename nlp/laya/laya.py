@@ -48,8 +48,12 @@ class LayaEngine(NLPEngine):
         instructions: str = "Quelle est l'intention de l'utilisateur ?",
         min_confidence: float = 0.50,
         catalog_path: str | None = None,
+        music_controls_intent: str = "rules",
     ):
-        super().__init__(catalog_path=catalog_path)
+        super().__init__(
+            catalog_path=catalog_path,
+            music_controls_intent=music_controls_intent,
+        )
         logger.info("Chargement du modèle Laya (%s / %s)...", repo, subfolder)
 
         # Charge un seul checkpoint (pas de Router : le français est fixé

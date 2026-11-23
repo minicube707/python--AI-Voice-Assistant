@@ -148,26 +148,31 @@ class VoiceAssistant:
         """
 
         engine_name = self.cfg["nlp"]["engine"]
+        music_controls_intent = self.cfg["nlp"].get("music_controls_intent", "rules")
         self.logger.info("Loading NLP Engine: %s", engine_name)
 
         if engine_name == "rules":
             self.nlp_engine = RulesEngine(
                 catalog_path=self.cfg["music_library"]["catalog_path"],
+                music_controls_intent=music_controls_intent,
             )
 
         elif engine_name == "zeroshot":
             self.nlp_engine = ZeroShotIntentEngine(
                 catalog_path=self.cfg["music_library"]["catalog_path"],
+                music_controls_intent=music_controls_intent,
             )
 
         elif engine_name == "laya":
             self.nlp_engine = LayaEngine(
                 catalog_path=self.cfg["music_library"]["catalog_path"],
+                music_controls_intent=music_controls_intent,
             )
         
         elif engine_name == "neural":
             self.nlp_engine = NeuralEngine(
                 catalog_path=self.cfg["music_library"]["catalog_path"],
+                music_controls_intent=music_controls_intent,
             )
 
         else:
@@ -348,8 +353,8 @@ class VoiceAssistant:
                 resume_music = False
                 if self.player._is_playing:
                     resume_music = True
+                    self.player.pause()
 
-                self.player.pause()
                 activation_sound.play_activation_sound()
 
                 audio = self.record_command()

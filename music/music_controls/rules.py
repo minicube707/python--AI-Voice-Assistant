@@ -1,11 +1,9 @@
 from nlp.command import Command
+from music.music_controls.volume import extract_volume
 
-import re
 
 def extract_music_controls(sentence: str) -> Command:
-    """Extracts the music controls from a sentence.
-
-    The function  attempts to extract the music controls using predefined keywords.
+    """Extracts the music controls from a sentence using keyword rules.
 
     Args:
         sentence (str): The input sentence containing music information.
@@ -31,18 +29,8 @@ def extract_music_controls(sentence: str) -> Command:
         if "moins fort" in sentence or "baisse" in sentence:
             return Command(argument={"action": "decrease_volume"})
 
-        match = re.search(r"(\d+)\s*(?:%)", sentence)
-
-        if match:
-            volume = int(match.group(1))
-        else:
-            volume = None
-    
         return Command(
-            argument={
-                "action": "volume",
-                'volume': volume
-            }
+            argument={"action": "volume", "volume": extract_volume(sentence)}
         )
 
     return Command(status="error")
