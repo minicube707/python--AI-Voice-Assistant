@@ -24,8 +24,8 @@ audio:
 
 
 nlp:
-  engine: "neural"               # 'zeroshot', 'rules', 'laya', 'neural'
-  music_controls_intent: "neural"   # 'rules' or 'neural' (neural requires: python main.py --train controls)
+  engine: "rules"                # 'zeroshot', 'rules', 'laya', 'neural'
+  music_controls_intent: "rules"   # 'rules' or 'neural' (neural requires: python main.py --train controls)
 
 
 stt:
