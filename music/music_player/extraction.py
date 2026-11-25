@@ -15,6 +15,14 @@ from nlp.command import Command
 
 THRESOLD_SCORE = 75
 
+# Lower bar used when the candidates are already restricted to one artist
+# or one album: there are few of them, so a weaker match is still trustworthy.
+SCOPED_THRESOLD_SCORE = 60
+
+# Maximum share of the score removed when the two texts have a very
+# different number of words ("chuan legacy" vs "tron legacy end titles").
+LENGTH_PENALTY = 0.5
+
 MUSIC_KEYWORDS = [
     "musique",
     "chanson",
@@ -165,6 +173,37 @@ def complete_metadata(
     return requested_item, context_item
 
 
+def find_value(sentence: list[str]) -> tuple[str, str]:
+    """Splits a sentence without keyword into "requested item" and "context".
+
+    Used for sentences like "joue Billie Jean de Michael Jackson": the text
+    is cut at the last conjunction word, because a title may itself contain
+    one ("le chant de la terre de ...") while the artist comes last.
+
+    Args:
+        sentence (list[str]): A list of words forming the sentence.
+
+    Returns:
+        tuple[str, str]: The requested item and the context item
+            (the second one is empty when there is no conjunction).
+    """
+
+    split = max((i for i, word in enumerate(sentence) if word in CONJUNCTION_WORDS), default=None,)
+
+    if split is None:
+        left, right = sentence, []
+    else:
+        left, right = sentence[:split], sentence[split + 1:]
+
+    def strip_articles(words: list[str]) -> str:
+        words = list(words)
+        while words and words[0] in ARTICLE_WORD:
+            words.pop(0)
+        return ' '.join(words)
+
+    return strip_articles(left), strip_articles(right)
+
+
 def get_best_matching(
         list1: list[str],
         list2: list[str],
@@ -176,8 +215,11 @@ def get_best_matching(
     """Finds the best matching for a given value.
 
     Uses fuzzy string matching to compare the input value against the
-    provided list1 and list2. The similarity score is the average of
-    WRatio and token_sort_ratio.
+    provided list1 and list2. The similarity score is WRatio, reduced by a
+    penalty when the number of words or characters differs
+    (up to `LENGTH_PENALTY`).
+    WRatio alone is too lenient: a single shared word is enough to give a
+    very high score to a much longer candidate.
 
     Args:
         list1 (list[str]): A list of available items.
@@ -196,12 +238,16 @@ def get_best_matching(
         wratio = fuzz.WRatio(s1, s2)
         len_s1 = len(s1.split(' '))
         len_s2 = len(s2.split(' '))
-        length_ratio = min(len_s1, len_s2) / max(len_s1, len_s2)
+        word_ratio = min(len_s1, len_s2) / max(len_s1, len_s2)
 
-        penalty = 0.9 + (length_ratio * 0.1)
-        wratio *= penalty
-        
-        return wratio
+        # Also compare the number of characters: with a single word on each
+        # side ("la" vs "blablabla"), the word count cannot tell them apart.
+        char_ratio = min(len(s1), len(s2)) / max(len(s1), len(s2), 1)
+        length_ratio = min(word_ratio, char_ratio)
+
+        penalty = (1 - LENGTH_PENALTY) + (length_ratio * LENGTH_PENALTY)
+
+        return wratio * penalty
 
     if list1:
         best_list1 = process.extractOne(
@@ -262,32 +308,79 @@ def refine_with_catalog(
     if not catalog:
         return title, album, artist
 
-    list_titles = [e["title"] for e in catalog]
-    list_albums = create_unique_list(catalog, 'album')
-    list_artists = create_unique_list(catalog, 'artist')
+    # What the user explicitly asked for ("la chanson", "l'album", "le groupe"),
+    # None when the sentence does not say it.
+    if title is not None:
+        requested_kind = "title"
+    elif album is not None:
+        requested_kind = "album"
+    else:
+        requested_kind = None
 
-    best_title, best_album = get_best_matching(list_titles, list_albums, requested_item)
+    if title is not None and album is not None:
+        context_kind = "album"
+    elif artist is not None or requested_kind == "album":
+        context_kind = "artist"      # an album can only come from an artist
+    else:
+        context_kind = None
 
-    find_album = False
-    if best_title[1] > THRESOLD_SCORE and best_title[1] > best_album[1]:
-        title = best_title[0]
-        album = None
-    elif best_album[1] > THRESOLD_SCORE and best_title[1] < best_album[1]:
-        album = best_album[0]
-        title = None
-        find_album = True
-    
-    best_album, best_artist = get_best_matching(list_albums, list_artists, context_item)
+    # 1. Resolve the context first (artist or album): once it is known,
+    #    the requested item only has to be searched among its tracks.
+    context_type, context_value = None, None
+    scope = catalog
 
-    if best_album[1] > THRESOLD_SCORE and best_album[1] > best_artist[1]:
-        album = best_album[0]
-        artist = None
-    elif best_artist[1] > THRESOLD_SCORE and best_album[1] < best_artist[1]:
-        artist = best_artist[0]
-        if not find_album:
-            album = None
+    if context_item:
+        albums = _unique_values(catalog, "album") if context_kind != "artist" else []
+        artists = create_unique_list(catalog, "artist") if context_kind != "album" else []
+
+        best_album, best_artist = get_best_matching(albums, artists, context_item)
+
+        if best_album[1] > THRESOLD_SCORE and best_album[1] > best_artist[1]:
+            context_type, context_value = "album", best_album[0]
+        elif best_artist[1] > THRESOLD_SCORE and best_artist[1] > best_album[1]:
+            context_type, context_value = "artist", best_artist[0]
+
+        if context_type:
+            scope = [e for e in catalog if e[context_type] == context_value]
+
+    # 2. Resolve the requested item (title or album), only among the kinds
+    #    the user asked for.
+    requested_type, requested_value = None, None
+
+    if requested_item:
+        threshold = THRESOLD_SCORE if scope is catalog else SCOPED_THRESOLD_SCORE
+
+        titles = [e["title"] for e in scope] if requested_kind != "album" else []
+        albums = _unique_values(scope, "album") if requested_kind != "title" else []
+
+        best_title, best_album = get_best_matching(titles, albums, requested_item)
+
+        if best_title[1] > threshold and best_title[1] >= best_album[1]:
+            requested_type, requested_value = "title", best_title[0]
+        elif best_album[1] > threshold and best_album[1] > best_title[1]:
+            requested_type, requested_value = "album", best_album[0]
+
+    # 3. Build the result. Whatever could not be matched keeps its raw value,
+    #    so that find_track() fails instead of playing a wrong track.
+    if requested_type == "title":
+        title, album = requested_value, None
+    elif requested_type == "album":
+        title, album = None, requested_value
+    elif requested_item and title is None and album is None:
+        title = requested_item      # nothing matched: not_found, never "everything"
+
+    if context_type == "artist":
+        artist = context_value
+    elif context_type == "album":
+        album, artist = context_value, None
 
     return title, album, artist
+
+
+def _unique_values(catalog: list[dict], key: str) -> list[str]:
+    """Return the distinct non-empty values of `key`, in catalog order."""
+
+    return list(dict.fromkeys(e[key] for e in catalog if e[key]))
 
 
 def update_item(
@@ -359,6 +452,10 @@ def extract_play_music(catalog: list[dict], sentence: str) -> Command:
 
     if not requested_item or not context_item:
         requested_item, context_item = complete_metadata(requested_item, context_item, sentence.copy())
+
+    # No keyword at all ("joue X de Y"): split on the conjunction word
+    if not requested_item and not context_item:
+        requested_item, context_item = find_value(sentence)
 
     title, album, artist = refine_with_catalog(
         catalog,
