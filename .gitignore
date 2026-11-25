@@ -17,4 +17,7 @@ test.py
 
 # Model
 models/
- 
+
+# Config
+config/config.yaml
+

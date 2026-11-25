@@ -81,7 +81,21 @@ docker info
 
 ## Usage
 
-### 1. Index your music
+### 1. Create your configuration
+
+The repository only contains `config/config.example.yaml`. Your own `config/config.yaml` is
+ignored by git, so your personal settings (music folder, engines...) are never committed.
+
+Copy the example file to `config.yaml` in the `config` folder:
+
+```powershell
+copy config\config.example.yaml config\config.yaml
+```
+
+Then open `config/config.yaml` and set at least `player.music_dir` (see [Configuration](#configuration)).
+The assistant cannot start without this file.
+
+### 2. Index your music
 
 Run this once, then again whenever you add new songs. The program scans your
 music folder and generates a JSON file in `data/`.
@@ -96,7 +110,7 @@ Run this with -f whenever you want to force a full re-parse of your music folder
 python main.py --parse -f
 ```
 
-### 2. Train the neural models (neural engine / neural extraction only)
+### 3. Train the neural models (neural engine / neural extraction only)
 
 The `neural` NLP engine and the `neural` music controls extractor rely on models
 that are **not available until you train them**. If you select one of them in
@@ -113,7 +127,7 @@ Training takes a few seconds on CPU. Run it again whenever you edit a dataset
 (`nlp/neural/intents.json`, `music/music_controls/intents.json`, `reply/reply.json`).
 The default `rules` engine and `rules` extractor need no training.
 
-### 3. Start the assistant
+### 4. Start the assistant
 
 ```powershell
 python main.py
@@ -171,7 +185,7 @@ Internet access is required for online searches, such as retrieving news or Wiki
 Ollama must be installed and properly configured for AI-powered responses.
 Docker Desktop is optional and can be used to provide an isolated sandbox for executing and testing model-generated Python code.
 
-### 4. Quit the assistant
+### 5. Quit the assistant
 
 Say **"Hey Jarvis"** followed by **"au revoir"**, **"bye"** or **ciao**  to exit the program.
 
@@ -280,7 +294,7 @@ nlp:
 ```
 
 The `neural` engine detects the intent with a small neural network.
-**Train it first** with `python main.py --train intents` (see [Usage](#2-train-the-neural-models-neural-engine--neural-extraction-only)).
+**Train it first** with `python main.py --train intents` (see [Usage](#3-train-the-neural-models-neural-engine--neural-extraction-only)).
 
 ```yaml
 nlp:
